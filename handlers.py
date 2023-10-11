@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.enums.dice_emoji import DiceEmoji
 from aiogram.filters import CommandObject
 from aiogram import html
+from datetime import datetime
 
 router = Router()
 
@@ -42,3 +43,30 @@ async def cmd_name(message: types.Message, command: CommandObject):
 
     else:
         await message.answer("Пожалуйста, укажи своё имя после команды /name!")
+
+
+# @router.message(F.text)
+# async def echo_with_time(message: types.Message):
+#    time_now = datetime.now().strftime("%H:%M")
+#    added_text = html.underline(f"Создано в {time_now}")
+#    await message.answer(f"{message.html_text}\n\n{added_text}", parse_mode="HTML")
+
+@router.message(F.text)
+async def echo_with_time(message: types.Message):
+    data = {
+        "url": "<N/A>",
+        "email": "<N/A>",
+        "code": "<N/A>"
+    }
+    entities = message.entities or []
+    for item in entities:
+        if item.type in data.keys():
+            data[item.type] = item.extract_from(message.text)
+
+    await message.reply(
+        "Вот что я нашёл:\n"
+        f"URL: {html.quote(data['url'])}\n"
+        f"E-mail: {html.quote(data['email'])}\n"
+        f"Пароль: {html.quote(data['code'])}"
+
+    )
