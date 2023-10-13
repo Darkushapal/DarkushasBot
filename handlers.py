@@ -5,6 +5,8 @@ from aiogram.filters import CommandObject
 from aiogram import html
 from datetime import datetime
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+import random
 
 router = Router()
 
@@ -62,25 +64,44 @@ async def on_user_shared(message: types.Message):
     )
 
 
-@router.message(Command("test1"))
-async def cmd_test1(message: types.Message):
-    await message.reply("Test1")
+@router.message(Command("inline_url"))
+async def cmd_inline_url(message: types.Message):
+    builder = InlineKeyboardBuilder()
+    builder.row(types.InlineKeyboardButton(
+        text="GitHub", url="https://github.com")
+    )
+
+    #user_id = 1234567890
+    #chat_info = await message.bot.get_chat(user_id)
+    #if not chat_info.has_private_forwards:
+    #    builder.row(types.InlineKeyboardButton(
+    #        text="Какой-то пользователь",
+    #        url=f"tg://user?id={user_id}")
+    #    )
+
+    await message.answer(
+        'Chose a link',
+        reply_markup=builder.as_markup()
+    )
 
 
-@router.message(Command("Roll1"))
-async def cmd_dice1(message: types.Message):
-    await message.answer_dice(emoji="🎲")
+@router.message(Command("random"))
+async def cmd_random(message: types.Message):
+    builder = InlineKeyboardBuilder()
+    builder.add(types.InlineKeyboardButton(
+        text="Нажми меня",
+        callback_data="random_value")
+    )
+    await message.answer(
+        "Нажмите на кнопку, чтобы бот отправил число от 1 до 10",
+        reply_markup=builder.as_markup()
+    )
 
 
-@router.message(Command("add_to_list"))
-async def cmd_add_to_list(message: types.Message, mylist: list[int]):
-    mylist.append(7)
-    await message.reply("Добавлено число семь!")
-
-
-@router.message(Command("show_list"))
-async def cmd_show_list(message: types.Message, mylist: list[int]):
-    await message.answer(f"Ваш список: {mylist}")
+@router.callback_query(F.data == "random_value")
+async def send_random_value(callback: types.CallbackQuery):
+    await callback.message.answer(str(random.randint(1, 10)))
+    await callback.answer()
 
 
 @router.message(Command("name"))
