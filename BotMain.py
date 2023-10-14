@@ -15,8 +15,6 @@ dp = Dispatcher()
 
 dp.include_router(router)
 
-mylist = [1, 2, 3]
-
 
 async def main():
     await dp.start_polling(bot)
