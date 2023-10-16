@@ -12,6 +12,8 @@ from aiogram.exceptions import TelegramBadRequest
 from typing import Optional
 from aiogram.filters.callback_data import CallbackData
 from aiogram import F
+from aiogram.utils.callback_answer import CallbackAnswerMiddleware, CallbackAnswer
+
 
 router = Router()
 
@@ -251,28 +253,68 @@ async def cmd_name(message: types.Message, command: CommandObject):
 
     else:
         await message.answer("Пожалуйста, укажи своё имя после команды /name!")
+'''
+Any text answers
 
-# @router.message(F.text)
-# async def echo_with_time(message: types.Message):
-#    time_now = datetime.now().strftime("%H:%M")
-#    added_text = html.underline(f"Создано в {time_now}")
-#    await message.answer(f"{message.html_text}\n\n{added_text}", parse_mode="HTML")
+Datetime
 
-# @router.message(F.text)
-# async def echo_with_time(message: types.Message):
-#    data = {
-#        "url": "<N/A>",
-#        "email": "<N/A>",
-#        "code": "<N/A>"
-#    }
-#    entities = message.entities or []
-#    for item in entities:
-#        if item.type in data.keys():
-#            data[item.type] = item.extract_from(message.text)
-#
-#    await message.reply(
-#        "Вот что я нашёл:\n"
-#        f"URL: {html.quote(data['url'])}\n"
-#        f"E-mail: {html.quote(data['email'])}\n"
-#        f"Пароль: {html.quote(data['code'])}"
-#    )
+@router.message(F.text)
+async def echo_with_time(message: types.Message):
+    time_now = datetime.now().strftime("%H:%M")
+    added_text = html.underline(f"Создано в {time_now}")
+    await message.answer(f"{message.html_text}\n\n{added_text}", parse_mode="HTML")
+
+
+Url Finder
+
+ @router.message(F.text)
+ async def echo_with_time(message: types.Message):
+    data = {
+        "url": "<N/A>",
+        "email": "<N/A>",
+        "code": "<N/A>"
+    }
+    entities = message.entities or []
+    for item in entities:
+        if item.type in data.keys():
+            data[item.type] = item.extract_from(message.text)
+
+    await message.reply(
+        "Вот что я нашёл:\n"
+        f"URL: {html.quote(data['url'])}\n"
+        f"E-mail: {html.quote(data['email'])}\n"
+        f"Пароль: {html.quote(data['code'])}"
+    )
+'''
+
+
+'''
+Middleware to handle callbacks
+
+
+router.callback_query.middleware(
+    CallbackAnswerMiddleware(
+        pre=True, text="Готово!", show_alert=True
+    )
+)
+
+@router.callback_query()
+async def my_handler(callback: CallbackQuery, callback_answer: CallbackAnswer):
+    if <everything is ok>:
+        callback_answer.text = "Отлично!"
+    else:
+        callback_answer.text = "Что-то пошло не так, попробуйте позже"
+        callback_answer.cache_time = 10
+
+
+from aiogram import flags
+from aiogram.utils.callback_answer import CallbackAnswer
+
+@router.callback_query()
+@flags.callback_answer(pre=False)  # переопределяем флаг pre
+async def my_handler(callback: CallbackQuery, callback_answer: CallbackAnswer):
+    тут какой-то код
+    if <everything is ok>:
+        callback_answer.text = "Теперь этот текст будет видно!"
+    тут какой-то код
+'''
